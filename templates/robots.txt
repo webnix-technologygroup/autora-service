@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /staff/
+Disallow: /admin/
+Disallow: /access/
+Disallow: /success/
+Disallow: /portal/
+Disallow: /private/
+Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml

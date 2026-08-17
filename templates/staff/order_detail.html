@@ -1,0 +1,154 @@
+{% extends "staff/base.html" %}{% block title %}{{ order.number }}{% endblock %}{% block content %}<nav class="crumbs">
+<a href="{% url 'staff_orders' %}">Заявки</a>
+<span>/</span>
+<span>{{ order.number }}</span>
+</nav>
+<div class="order-head">
+<div>
+<p class="kicker">{{ order.number }}</p>
+<h1>{{ order.vehicle }}</h1>
+<p>{{ order.customer.name }} · {{ order.service_name }}</p>
+</div>
+<span class="status-label status-{{ order.status }}">
+<i>
+</i>{{ order.get_status_display }}</span>
+</div>{% if order.is_terminal %}<div class="terminal-note">Заказ завершён. Операционные изменения заблокированы.</div>{% endif %}{% if new_client_url %}<section class="one-time-link" aria-live="polite">
+<b>Новая клиентская ссылка</b>
+<p>Показывается только сейчас. Скопируйте и передайте клиенту безопасным способом.</p>
+<div>
+<input value="{{ new_client_url }}" readonly data-copy-source>
+<button class="sbtn accent" type="button" data-copy>Копировать</button>
+</div>
+</section>{% endif %}<div class="order-layout">
+<div class="order-main">
+<section class="staff-panel">
+<div class="panel-head">
+<h2>Сводка</h2>
+</div>
+<dl class="summary-grid">
+<div>
+<dt>Клиент</dt>
+<dd>{{ order.customer.name }}<small>{{ order.customer.phone }} · {{ order.customer.email|default:'email не указан' }}</small>
+</dd>
+</div>
+<div>
+<dt>Автомобиль</dt>
+<dd>{{ order.vehicle }}<small>{{ order.vehicle.year|default:'год не указан' }} · {{ order.vehicle.plate|default:'без номера' }}</small>
+</dd>
+</div>
+<div>
+<dt>Желаемое время</dt>
+<dd>{{ order.desired_date|date:'d.m.Y' }} {{ order.desired_time|default:'' }}</dd>
+</div>
+<div>
+<dt>Подтверждённое время</dt>
+<dd>{{ order.confirmed_start_at|date:'d.m.Y H:i'|default:'Не подтверждено' }}{% if order.confirmed_by %}<small>{{ order.confirmed_by }} · {{ order.booking_confirmed_at|date:'d.m H:i' }}</small>{% endif %}</dd>
+</div>
+</dl>
+<h3>Описание проблемы</h3>
+<p>{{ order.problem }}</p>
+</section>
+<section class="staff-panel">
+<div class="panel-head">
+<h2>Фотографии</h2>
+<span>{{ order.photos.count }}</span>
+</div>
+<div class="staff-photos">{% for photo in order.photos.all %}<button type="button" data-photo="{% url 'private_photo' photo.pk %}" data-name="{{ photo.original_name }}">
+<img src="{% url 'private_photo' photo.pk %}" alt="Фото заявки {{ forloop.counter }}" loading="lazy">
+<small>{{ photo.original_name }} · {{ photo.size|filesizeformat }}</small>
+</button>{% empty %}<div class="staff-empty">Фотографии не приложены.</div>{% endfor %}</div>
+</section>
+<section class="staff-panel" id="estimate">
+<div class="panel-head">
+<h2>Смета</h2>
+<b>{{ order.estimate|default:'0.00' }} ₴</b>
+</div>
+<div class="estimate-list">{% for item in order.estimate_items.all %}<div>
+<span>
+<b>{{ item.name }}</b>
+<small>{{ item.get_item_type_display }} · {{ item.quantity }} × {{ item.unit_price }} ₴</small>
+</span>
+<strong>{{ item.total }} ₴</strong>{% if can_manage_finance and not order.is_terminal %}<form method="post" action="{% url 'delete_estimate_item' order.pk item.pk %}" data-confirm="Удалить позицию сметы?">{% csrf_token %}<button class="icon-danger" aria-label="Удалить">×</button>
+</form>{% endif %}</div>{% empty %}<div class="staff-empty">Позиции сметы ещё не добавлены.</div>{% endfor %}</div>{% if can_manage_finance and not order.is_terminal %}<details class="action-box">
+<summary>Добавить позицию</summary>
+<form method="post" action="{% url 'add_estimate_item' order.pk %}" class="manual-form">{% csrf_token %}{% for field in item_form %}<label>
+<span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="error">{{ error }}</small>{% endfor %}</label>{% endfor %}<button class="sbtn accent">Добавить</button>
+</form>
+</details>{% endif %}</section>
+<section class="staff-panel">
+<div class="panel-head">
+<h2>Внутренние комментарии</h2>
+</div>
+<div class="comment-list">{% for c in order.comments.all %}<article>
+<b>{{ c.author }}</b>
+<time>{{ c.created_at|date:'d.m.Y H:i' }}</time>
+<p>{{ c.text }}</p>
+</article>{% empty %}<div class="staff-empty">Комментариев нет.</div>{% endfor %}</div>{% if not order.is_terminal %}<form method="post" action="{% url 'add_comment' order.pk %}" class="manual-form">{% csrf_token %}<label>
+<span>{{ comment_form.text.label }}</span>{{ comment_form.text }}</label>
+<button class="sbtn">Добавить комментарий</button>
+</form>{% endif %}</section>
+<section class="staff-panel">
+<div class="panel-head">
+<h2>История и аудит</h2>
+</div>
+<div class="audit-list">{% for event in order.events.all %}<article>
+<i>
+</i>
+<div>
+<b>{{ event.get_kind_display }}</b>
+<small>{{ event.created_at|date:'d.m.Y H:i' }} · {{ event.actor|default:'Система' }}</small>{% if event.public_message %}<p>{{ event.public_message }}</p>{% endif %}{% if event.internal_message %}<p class="internal">{{ event.internal_message }}</p>{% endif %}</div>
+</article>{% empty %}<div class="staff-empty">Событий нет.</div>{% endfor %}</div>
+</section>
+</div>
+<aside class="order-actions">{% if not order.is_terminal %}<section class="staff-panel">
+<h2>Статус</h2>
+<form method="post" action="{% url 'change_status' order.pk %}" class="manual-form">{% csrf_token %}{% for field in status_form %}<label>
+<span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="error">{{ error }}</small>{% endfor %}</label>{% endfor %}<button class="sbtn accent">Изменить статус</button>
+</form>
+</section>{% endif %}{% if can_schedule and not order.is_terminal %}<section class="staff-panel">
+<h2>Расписание</h2>
+<p class="muted">Отдельно от желаемого времени клиента.</p>
+<form method="post" action="{% url 'update_schedule' order.pk %}" class="manual-form">{% csrf_token %}{% for field in schedule_form %}<label>
+<span>{{ field.label }}</span>{{ field }}</label>{% endfor %}<button class="sbtn">Подтвердить время</button>
+</form>
+</section>{% endif %}{% if can_assign and not order.is_terminal %}<section class="staff-panel">
+<h2>Ответственный</h2>
+<form method="post" action="{% url 'assign_order' order.pk %}" class="manual-form">{% csrf_token %}<label>
+<span>{{ assignment_form.assigned_to.label }}</span>{{ assignment_form.assigned_to }}</label>
+<button class="sbtn">Сохранить</button>
+</form>
+</section>{% endif %}{% if can_manage_finance and not order.is_terminal %}<section class="staff-panel">
+<h2>Стоимость</h2>
+<form method="post" action="{% url 'update_price' order.pk %}" class="manual-form">{% csrf_token %}{% for field in price_form %}<label>
+<span>{{ field.label }}</span>{{ field }}</label>{% endfor %}<button class="sbtn">Сохранить</button>
+</form>{% if order.estimate is not None and order.status == 'awaiting_approval' %}<hr>
+<h3>Ручное согласование</h3>
+<form method="post" action="{% url 'record_manual_approval' order.pk %}" class="manual-form">{% csrf_token %}{{ manual_approval_form.version }}<label>
+<span>{{ manual_approval_form.method.label }}</span>{{ manual_approval_form.method }}</label>
+<label>
+<span>{{ manual_approval_form.note.label }}</span>{{ manual_approval_form.note }}</label>
+<button class="sbtn">Зафиксировать согласование</button>
+</form>{% endif %}</section>{% endif %}<section class="staff-panel">
+<h2>Клиентская ссылка</h2>{% with link=order.access_links.last %}<p>{% if link and link.is_valid %}<span class="status-label status-ready">
+<i>
+</i>Активна до {{ link.expires_at|date:'d.m.Y H:i' }}</span>{% else %}<span class="status-label status-canceled">
+<i>
+</i>Неактивна</span>{% endif %}</p>{% endwith %}{% if can_manage_links and not order.is_terminal %}<form method="post" action="{% url 'reissue_link' order.pk %}" data-confirm="Старая ссылка будет немедленно отозвана. Продолжить?">{% csrf_token %}<button class="sbtn danger">Перевыпустить</button>
+</form>{% endif %}</section>
+<section class="staff-panel">
+<h2>Уведомления</h2>
+<div class="notification-list">{% for n in order.notifications.all %}<article>
+<div>
+<b>{{ n.get_channel_display }} · {{ n.event_type }}</b>
+<small>{{ n.get_status_display }} · попыток {{ n.attempts }}{% if n.next_attempt_at %} · {{ n.next_attempt_at|date:'d.m H:i' }}{% endif %}</small>{% if n.last_error %}<p class="error-text">{{ n.last_error }}</p>{% endif %}</div>{% if can_retry and n.status == 'failed' %}<form method="post" action="{% url 'retry_notification' order.pk n.pk %}">{% csrf_token %}<button class="sbtn small">Повторить</button>
+</form>{% endif %}</article>{% empty %}<div class="staff-empty">Уведомлений нет.</div>{% endfor %}</div>
+</section>
+</aside>
+</div>
+<dialog class="photo-dialog" aria-labelledby="photo-dialog-title">
+<h2 id="photo-dialog-title" class="visually-hidden">Просмотр фотографии</h2>
+<button type="button" data-photo-close aria-label="Закрыть">×</button>
+<img alt="Просмотр фотографии">
+<p>
+</p>
+</dialog>{% endblock %}

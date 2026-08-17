@@ -1,0 +1,47 @@
+{% extends "service/base.html" %}
+{% block robots %}noindex,nofollow,noarchive{% endblock %}
+{% block title %}Статус заказа {{ order.number }}{% endblock %}
+{% block content %}
+<section class="section soft">
+  <div class="wrap narrow">
+    <span class="eyebrow">Защищённая страница</span>
+    <h1>{{ order.get_status_display }}</h1>
+    <div class="summary">
+      <b>{{ order.number }}</b>
+      <span>{{ order.vehicle }}</span>
+      <span>{{ order.service_name }}</span>
+      <span>Желаемая дата: {{ order.desired_date }}{% if order.desired_time %}, {{ order.desired_time|time:'H:i' }}{% endif %}</span>
+      {% if order.confirmed_start_at %}<strong>Подтверждено: {{ order.confirmed_start_at|date:'d.m.Y H:i' }}{% if order.confirmed_end_at %}–{{ order.confirmed_end_at|date:'H:i' }}{% endif %}</strong>{% endif %}
+    </div>
+    <section class="panel" aria-labelledby="estimate-title">
+      <h2 id="estimate-title">Стоимость</h2>
+      <p>Цена от: <b>{{ order.service_price_from|floatformat:0 }} ₴</b></p>
+      {% if order.estimate is not None %}<p>Предварительная смета: <b>{{ order.estimate|floatformat:2 }} ₴</b></p>{% endif %}
+      {% if order.final_price %}<p>Итоговая стоимость: <b>{{ order.final_price|floatformat:2 }} ₴</b></p>{% endif %}
+      {% for item in items %}<div class="estimate-row"><span>{{ item.name }} × {{ item.quantity }}</span><b>{{ item.total|floatformat:2 }} ₴</b></div>{% endfor %}
+      {% if order.estimate is not None %}
+        <div class="estimate-state">
+          {% if order.estimate_approved and order.approved_estimate_amount == order.estimate %}
+            <strong>Смета согласована</strong>
+            {% if order.estimate_approval_method == 'client_portal' %}<p>Согласовано клиентом в защищённом кабинете.</p>
+            {% elif order.estimate_approval_method == 'phone' %}<p>Согласование зафиксировано сотрудником по телефону.</p>
+            {% elif order.estimate_approval_method == 'in_person' %}<p>Согласование зафиксировано при личном общении.</p>
+            {% elif order.estimate_approval_method == 'email' %}<p>Согласование зафиксировано по email.</p>
+            {% endif %}
+          {% elif order.status == 'awaiting_approval' %}
+            <strong>Ожидает согласования</strong>
+            <form method="post" action="{% url 'client_estimate_approve' %}">
+              {% csrf_token %}<input type="hidden" name="version" value="{{ order.estimate_version }}">
+              <button class="btn primary" type="submit">Согласовать {{ order.estimate|floatformat:2 }} ₴</button>
+            </form>
+          {% elif order.status == 'new' or order.status == 'pending' or order.status == 'booked' or order.status == 'accepted' or order.status == 'diagnostics' %}
+            <p>Смета подготовлена. Возможность согласования появится на соответствующем этапе.</p>
+          {% else %}<p>Этап согласования завершён.</p>{% endif %}
+        </div>
+      {% endif %}
+    </section>
+    {% if order.photos.exists %}<section class="panel"><h2>Фотографии заявки</h2><div class="photo-grid">{% for photo in order.photos.all %}<img src="{% url 'private_photo' photo.pk %}" alt="Фотография к заявке {{ forloop.counter }}">{% endfor %}</div></section>{% endif %}
+    <section class="panel"><h2>Публичная история</h2><div class="timeline">{% for event in events %}<div><i></i><b>{{ event.public_message }}</b><small>{{ event.created_at|date:'d.m.Y H:i' }}</small></div>{% empty %}<p>История пока пуста.</p>{% endfor %}</div></section>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,9 @@
+Django==5.2.5
+gunicorn==23.0.0
+whitenoise==6.9.0
+psycopg[binary]==3.2.9
+Pillow==11.3.0
+django-redis==5.4.0
+redis==5.2.1
+
+cryptography==45.0.6

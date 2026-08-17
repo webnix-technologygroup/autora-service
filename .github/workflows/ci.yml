@@ -1,0 +1,27 @@
+name: CI
+on: [push, pull_request]
+permissions: {contents: read}
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_ENV: development
+      DJANGO_DEBUG: "0"
+      DJANGO_ALLOWED_HOSTS: localhost,testserver
+      PUBLIC_BASE_URL: http://testserver
+      CLIENT_TOKEN_ENCRYPTION_KEYS: ci-local-encryption-key
+      EMAIL_ENABLED: "0"
+      SECURE_SSL_REDIRECT: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12", cache: pip}
+      - run: pip install -r requirements.txt
+      - run: python manage.py makemigrations --check
+      - run: python manage.py migrate --noinput
+      - run: python manage.py seed_demo
+      - run: python manage.py seed_demo
+      - run: python manage.py check
+      - run: python manage.py test
+      - run: python manage.py collectstatic --noinput
+      - run: node --check service/static/service/app.js
