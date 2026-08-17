@@ -9,3 +9,5 @@ staticfiles/
 .DS_Store
 
 .env.development
+
+private_media/
