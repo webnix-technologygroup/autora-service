@@ -9,14 +9,7 @@ LOCAL_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0", "[::1]"}
 
 
 class LocalDevelopmentOriginMiddleware:
-    """Allow embedded local preview browsers while retaining CSRF tokens.
-
-    Some IDE preview panes send the literal header ``Origin: null``. Django
-    cannot compare that value with an http(s) trusted origin, so it rejects a
-    valid admin form before checking its token. Only in DEBUG and only for a
-    loopback host, discard that unusable header. CsrfViewMiddleware still runs
-    immediately afterwards and still requires a valid CSRF cookie/form token.
-    """
+    """Normalize opaque same-origin form submissions before CSRF validation."""
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -25,8 +18,20 @@ class LocalDevelopmentOriginMiddleware:
         from django.conf import settings
 
         hostname = request.get_host().partition(":")[0].lower()
-        if settings.DEBUG and hostname in LOCAL_HOSTS and request.META.get("HTTP_ORIGIN") == "null":
-            request.META.pop("HTTP_ORIGIN", None)
+        origin = request.META.get("HTTP_ORIGIN")
+
+        local_preview = settings.DEBUG and hostname in LOCAL_HOSTS
+        production_same_origin = (
+            not settings.DEBUG
+            and hostname in settings.ALLOWED_HOSTS
+            and request.is_secure()
+            and request.META.get("HTTP_SEC_FETCH_SITE") == "same-origin"
+            and request.META.get("HTTP_SEC_FETCH_MODE") == "navigate"
+        )
+
+        if origin == "null" and (local_preview or production_same_origin):
+            request.META["HTTP_ORIGIN"] = f"https://{request.get_host()}"
+
         return self.get_response(request)
 
 
