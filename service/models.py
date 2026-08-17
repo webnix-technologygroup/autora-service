@@ -38,7 +38,7 @@ class Service(models.Model):
         "Цена от", max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal("0"))]
     )
     duration_minutes = models.PositiveSmallIntegerField(default=60)
-    icon = models.CharField(max_length=8, default="⚙")
+    icon = models.CharField(max_length=32, default="⚙")
     is_active = models.BooleanField(default=True)
     order = models.PositiveIntegerField(default=0)
 
