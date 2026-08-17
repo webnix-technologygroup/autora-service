@@ -1,283 +1,256 @@
 <div align="center">
-  <img src="./service/static/service/logo-mark.svg" width="92" alt="AUTORA logo">
+  <img src="./service/static/service/logo-mark.svg" width="82" alt="AUTORA">
 
   # AUTORA
 
-  **A complete automotive-service workflow — from online booking to workshop delivery.**
+  ### Automotive service management — from booking to delivery
 
-  Customer cabinet · Staff operations · Estimates · In-app updates · Django Admin
-
-  <br>
-
-  [![Live](https://img.shields.io/badge/LIVE_DEMO-315EFB?style=for-the-badge&logo=render&logoColor=white)](https://autora-service.onrender.com/)
-  [![Customer cabinet](https://img.shields.io/badge/CUSTOMER_CABINET-0F172A?style=for-the-badge)](https://autora-service.onrender.com/client/)
-  [![CI](https://img.shields.io/github/actions/workflow/status/webnix-technologygroup/autora-service/ci.yml?style=for-the-badge&label=CI)](https://github.com/webnix-technologygroup/autora-service/actions/workflows/ci.yml)
+  A production-style Django platform with a public website, anonymous customer cabinet,
+  staff workspace, estimates, in-app updates, and system administration.
 
   <br>
 
-  ![Django](https://img.shields.io/badge/Django_5.2-0C4B33?logo=django&logoColor=white)
-  ![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white)
-  ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-4169E1?logo=postgresql&logoColor=white)
-  ![Render](https://img.shields.io/badge/Deploy-Render-46E3B7?logo=render&logoColor=111827)
+  **[Open live demo](https://autora-service.onrender.com/)**
+  &nbsp;&nbsp;·&nbsp;&nbsp;
+  **[Customer cabinet](https://autora-service.onrender.com/client/)**
+  &nbsp;&nbsp;·&nbsp;&nbsp;
+  **[CI status](https://github.com/webnix-technologygroup/autora-service/actions/workflows/ci.yml)**
 
   <br>
 
-  [Product](#product) · [Customer cabinet](#customer-cabinet) · [Staff workspace](#staff-workspace) · [Engineering](#engineering) · [Run locally](#run-locally)
+  `Django 5.2` &nbsp; `Python` &nbsp; `PostgreSQL` &nbsp; `Neon` &nbsp; `Render` &nbsp; `Gunicorn`
 </div>
 
 <br>
+<br>
 
-<img src="./docs/screenshots/01-home-desktop.jpg" alt="AUTORA public website" width="100%">
+![AUTORA home page](./docs/screenshots/01-home-desktop.jpg)
 
-<p align="center"><sub>Responsive public website and online service booking</sub></p>
+<p align="center"><sub>Public website · clear positioning, service discovery, and online booking</sub></p>
 
 <br>
 
-## Product
+## The idea
 
-AUTORA is a production-style Django application for a modern automotive workshop. It connects three distinct experiences in one system:
+AUTORA demonstrates how a real automotive workshop can connect its customer journey and internal operations in one product.
 
-<table>
-  <tr>
-    <td width="33%" valign="top">
-      <h3>Customer</h3>
-      Book a service<br>
-      Save multiple orders<br>
-      Track repair progress<br>
-      Review and approve estimates<br>
-      Read in-app updates
-    </td>
-    <td width="33%" valign="top">
-      <h3>Workshop team</h3>
-      Process incoming requests<br>
-      Assign responsible staff<br>
-      Schedule appointments<br>
-      Build estimates<br>
-      Publish customer-visible events
-    </td>
-    <td width="33%" valign="top">
-      <h3>System</h3>
-      Role-based permissions<br>
-      Private media access<br>
-      Audit-friendly event history<br>
-      Rate limits and CSRF protection<br>
-      PostgreSQL-backed persistence
-    </td>
-  </tr>
-</table>
-
-> **Portfolio demo:** all seeded customers, vehicles, orders, prices, and contact details are fictional.
-
-<br>
-
-## Customer cabinet
-
-No registration. No password. No Google or OAuth account.
-
-A customer adds an order using its **order number**. Django keeps authorized orders in a server-side browser session, allowing several orders to live in one cabinet without exposing access data through `localStorage`.
-
-<br>
-
-<table>
-  <tr>
-    <td width="50%">
-      <img src="./docs/screenshots/05-client-cabinet.jpg" alt="AUTORA customer cabinet">
-    </td>
-    <td width="50%">
-      <img src="./docs/screenshots/06-client-order.jpg" alt="AUTORA customer order details">
-    </td>
-  </tr>
-  <tr>
-    <td align="center"><sub><strong>One browser, multiple saved orders</strong></sub></td>
-    <td align="center"><sub><strong>Status, estimate, timeline, and notifications</strong></sub></td>
-  </tr>
-</table>
-
-<br>
-
-**Customer flow**
+A customer submits a request and receives a private order number. That number opens an anonymous browser-based cabinet—no registration, social login, or password required. Workshop staff process the same order in a dedicated operational interface, while Django Admin remains available for system-level management.
 
 ```text
-Submit request  →  Receive order number  →  Add to cabinet  →  Follow progress  →  Approve estimate
+Booking  →  Customer cabinet  →  Workshop processing  →  Estimate approval  →  Delivery
 ```
 
-<br>
-
-## Staff workspace
-
-A focused operational interface separate from Django Admin. Staff can manage daily workshop work without touching system-level configuration.
-
-<img src="./docs/screenshots/07-staff-dashboard.jpg" alt="AUTORA staff dashboard" width="100%">
-
-<p align="center"><sub>Operational dashboard with workload and order-state visibility</sub></p>
+> All seeded customers, vehicles, orders, prices, and contact details are fictional portfolio data.
 
 <br>
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>Order operations</h3>
-      Status transitions<br>
-      Staff assignment<br>
-      Appointment scheduling<br>
-      Internal comments<br>
-      Customer-visible history
-    </td>
-    <td width="50%" valign="top">
-      <h3>Finance and access</h3>
-      Estimate line items<br>
-      Approval state<br>
-      Final pricing<br>
-      Client-link management<br>
-      Notification retry controls
-    </td>
-  </tr>
-</table>
+# 01 — Public experience
 
-<img src="./docs/screenshots/09-staff-order-detail.jpg" alt="AUTORA staff order workspace" width="100%">
+## Services that are easy to understand
 
-<p align="center"><sub>One workspace for schedule, responsibility, estimates, comments, and history</sub></p>
+The public website presents the workshop without generic dashboard UI. Services, process, examples, guarantees, and contacts are designed as one coherent brand experience.
+
+![AUTORA services](./docs/screenshots/02-services-desktop.jpg)
+
+<p align="center"><sub>Service catalogue with clear categories, pricing cues, and visual hierarchy</sub></p>
 
 <br>
 
-## System administration
+## Booking without friction
 
-Django Admin remains the system-level control surface for services, customers, vehicles, orders, events, access links, estimates, and notifications.
+The booking form validates contact and vehicle information, protects against duplicate submissions, supports attachments, and rate-limits abuse.
 
-<img src="./docs/screenshots/10-django-admin.jpg" alt="Customized AUTORA Django Admin" width="100%">
+![AUTORA booking form](./docs/screenshots/03-booking-form.jpg)
 
-<p align="center"><sub>Customized Django Admin · users are created only with <code>createsuperuser</code></sub></p>
-
-<br>
-
-## Interface gallery
-
-The primary story stays visible above. Supporting screens are grouped below to keep the page easy to scan.
-
-<details>
-<summary><strong>Public booking journey</strong></summary>
+<p align="center"><sub>A focused request form built for a real service workflow</sub></p>
 
 <br>
 
-<table>
-  <tr>
-    <td width="50%"><img src="./docs/screenshots/02-services-desktop.jpg" alt="AUTORA service catalogue"></td>
-    <td width="50%"><img src="./docs/screenshots/03-booking-form.jpg" alt="AUTORA booking form"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Service catalogue</sub></td>
-    <td align="center"><sub>Booking form</sub></td>
-  </tr>
-</table>
+## A useful success state
+
+After submission, the customer receives an order number and a clear next step instead of a generic confirmation message.
+
+![AUTORA booking success](./docs/screenshots/04-booking-success.jpg)
+
+<p align="center"><sub>Successful submission with the private order number and cabinet entry point</sub></p>
+
+<br>
+<br>
+
+# 02 — Customer cabinet
+
+## No account. Still personal.
+
+The cabinet uses a secure Django session rather than a traditional user account. Customers add orders by number, keep several orders in the same browser, and remove them whenever they want.
+
+![AUTORA customer cabinet](./docs/screenshots/05-client-cabinet.jpg)
+
+<p align="center"><sub>Multiple orders, current statuses, update counters, and quick actions</sub></p>
 
 <br>
 
-<img src="./docs/screenshots/04-booking-success.jpg" alt="AUTORA booking success screen" width="100%">
+## Everything important in one order view
 
-<p align="center"><sub>Successful request and private order number</sub></p>
+The customer can follow progress, review the schedule and estimate, approve work, see workshop photos, and read customer-visible events.
 
-</details>
+![AUTORA customer order](./docs/screenshots/06-client-order.jpg)
+
+<p align="center"><sub>Order progress, estimate, history, and in-app notifications</sub></p>
+
+### Customer flow
+
+- Submit a service request.
+- Receive a private order number.
+- Add the order to the cabinet.
+- Follow status and schedule changes.
+- Review and approve the estimate.
+- Read new workshop updates.
+
+The browser receives only a secure session cookie. Order access metadata remains server-side and is never stored directly in `localStorage`.
+
+<br>
+<br>
+
+# 03 — Staff workspace
+
+## Designed for daily operations
+
+The staff area is not a recolored Django Admin. It is a separate workspace for the people processing orders every day.
+
+![AUTORA staff dashboard](./docs/screenshots/07-staff-dashboard.jpg)
+
+<p align="center"><sub>Workshop overview with operational metrics and current workload</sub></p>
 
 <br>
 
-<details>
-<summary><strong>Staff order management</strong></summary>
+## A queue that stays readable
+
+Orders can be searched, filtered, assigned, and opened without losing the operational context.
+
+![AUTORA staff orders](./docs/screenshots/08-staff-orders.jpg)
+
+<p align="center"><sub>Searchable order queue with status and responsibility visibility</sub></p>
 
 <br>
 
-<img src="./docs/screenshots/08-staff-orders.jpg" alt="AUTORA staff order list" width="100%">
+## One workspace per order
 
-<p align="center"><sub>Searchable and filterable workshop order queue</sub></p>
+Scheduling, responsibility, status, estimate items, approval, comments, and event history live together.
 
-</details>
+![AUTORA staff order detail](./docs/screenshots/09-staff-order-detail.jpg)
 
-<br>
+<p align="center"><sub>Operational order workspace for service advisors and workshop staff</sub></p>
 
-<details>
-<summary><strong>Responsive mobile experience</strong></summary>
+### Staff capabilities
 
-<br>
-
-<table>
-  <tr>
-    <td width="33%"><img src="./docs/screenshots/11-home-mobile.jpg" alt="AUTORA mobile home"></td>
-    <td width="33%"><img src="./docs/screenshots/12-client-cabinet-mobile.jpg" alt="AUTORA mobile customer cabinet"></td>
-    <td width="33%"><img src="./docs/screenshots/13-staff-mobile.jpg" alt="AUTORA mobile staff workspace"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Public UI</sub></td>
-    <td align="center"><sub>Customer cabinet</sub></td>
-    <td align="center"><sub>Staff workspace</sub></td>
-  </tr>
-</table>
-
-</details>
+- Role-based access to orders and operations
+- Staff assignment and appointment scheduling
+- Controlled status transitions
+- Estimate lines, totals, and approval state
+- Internal comments and public progress events
+- Client access-link management
+- Notification visibility and retry controls
 
 <br>
-
-<details>
-<summary><strong>Custom error states</strong></summary>
-
 <br>
 
-<img src="./docs/screenshots/14-error-404.jpg" alt="Custom AUTORA 404 page" width="100%">
+# 04 — System administration
 
-<p align="center"><sub>Branded 403, 404, and 500 experience</sub></p>
+Django Admin is reserved for system-level work: services, customers, vehicles, orders, access links, events, estimates, and notification records.
 
-</details>
+![AUTORA Django Admin](./docs/screenshots/10-django-admin.jpg)
+
+<p align="center"><sub>A customized administration experience consistent with the AUTORA product</sub></p>
+
+Superusers are created only through Django's standard command:
+
+```bash
+python manage.py createsuperuser
+```
+
+`seed_demo` never creates users, groups, passwords, or hidden administrator accounts.
 
 <br>
+<br>
 
-## Engineering
+# 05 — Responsive by design
 
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <h3>Application</h3>
-      <strong>Backend</strong> · Django 5.2<br>
-      <strong>Database</strong> · PostgreSQL on Neon<br>
-      <strong>Server</strong> · Gunicorn<br>
-      <strong>Static assets</strong> · WhiteNoise<br>
-      <strong>Frontend</strong> · Templates, CSS, vanilla JS, SVG
-    </td>
-    <td width="50%" valign="top">
-      <h3>Delivery</h3>
-      <strong>Hosting</strong> · Render Web Service<br>
-      <strong>Database TLS</strong> · <code>sslmode=require</code><br>
-      <strong>Health check</strong> · <code>/readiness/</code><br>
-      <strong>Automation</strong> · GitHub Actions<br>
-      <strong>Demo setup</strong> · idempotent seed command
-    </td>
-  </tr>
-</table>
+The public website, customer cabinet, and staff workspace were designed for mobile use—not simply scaled down after the desktop version.
 
-### Architecture
+<p align="center">
+  <img src="./docs/screenshots/11-home-mobile.jpg" width="31%" alt="AUTORA mobile home">
+  &nbsp;
+  <img src="./docs/screenshots/12-client-cabinet-mobile.jpg" width="31%" alt="AUTORA mobile customer cabinet">
+  &nbsp;
+  <img src="./docs/screenshots/13-staff-mobile.jpg" width="31%" alt="AUTORA mobile staff workspace">
+</p>
+
+<p align="center"><sub>Public website &nbsp;·&nbsp; Customer cabinet &nbsp;·&nbsp; Staff workspace</sub></p>
+
+Mobile behavior includes an animated navigation drawer, touch-friendly controls, stacked data layouts, readable forms, and no horizontal overflow.
+
+<br>
+<br>
+
+# 06 — Finished states matter
+
+Production polish also includes branded error handling. The project provides dedicated 403, 404, and 500 experiences instead of exposing Django defaults.
+
+![AUTORA custom 404](./docs/screenshots/14-error-404.jpg)
+
+<p align="center"><sub>Custom error experience that keeps users inside the product</sub></p>
+
+<br>
+<br>
+
+# Engineering
+
+## Stack
+
+- **Backend:** Python, Django 5.2
+- **Database:** PostgreSQL on Neon
+- **Application server:** Gunicorn
+- **Static assets:** WhiteNoise with compressed manifest storage
+- **Frontend:** Django templates, semantic HTML, CSS, vanilla JavaScript, SVG
+- **Deployment:** Render Web Service
+- **Automation:** GitHub Actions
+- **Authentication:** Django auth for staff; anonymous server-side sessions for customers
+
+## Architecture
 
 ```text
-Public site ─┐
-Customer UI ─┼──► Django / Gunicorn on Render ──TLS──► Neon PostgreSQL
-Staff UI ────┤              │
-Admin ───────┘              ├── WhiteNoise static assets
-                            └── Authorization-checked private media
+                         ┌─ Public website
+Browser ── HTTPS ──►     ├─ Customer cabinet
+                         ├─ Staff workspace
+                         └─ Django Admin
+                                  │
+                                  ▼
+                     Django + Gunicorn on Render
+                         │                  │
+                         │                  └─ WhiteNoise static assets
+                         │
+                         └─ TLS / sslmode=require ──► Neon PostgreSQL
 ```
 
-### Security model
+## Security choices
 
+- CSRF cookie and form-token validation for unsafe requests
+- Trusted-origin validation and safe same-origin handling on Render
 - Secure, HttpOnly, SameSite session cookies
-- CSRF token and trusted-origin validation for unsafe requests
-- Same-origin normalization for opaque Render form submissions without disabling CSRF
-- HTTPS redirect, HSTS, CSP, frame denial, and content-type protection
-- Private order media served only after authorization checks
-- Rate limits for booking and cabinet lookup
-- Production secrets validated and loaded only from environment variables
+- HTTPS redirect, HSTS, CSP, frame denial, and MIME protection
+- Authorization-checked private media endpoints
+- Rate limits for booking and order lookup
+- Server-side anonymous cabinet state
+- Production secrets loaded only from environment variables
+- Startup validation rejects placeholders and weak production values
 
 <br>
 
-## Demo
+# Try the demo
 
-**Live application:** https://autora-service.onrender.com/
+**Live:** https://autora-service.onrender.com/
 
-Use any seeded order number in the customer cabinet:
+Add any of these fictional orders to the customer cabinet:
 
 ```text
 DEMO-26-001
@@ -286,14 +259,13 @@ DEMO-26-003
 DEMO-26-004
 ```
 
-No phone number is required. Public staff and admin credentials are intentionally not included.
+A phone number is not required. Public staff and admin credentials are intentionally not included.
 
 <br>
 
-## Run locally
+# Run locally
 
-<details open>
-<summary><strong>Windows PowerShell</strong></summary>
+## Windows PowerShell
 
 ```powershell
 git clone https://github.com/webnix-technologygroup/autora-service.git
@@ -324,10 +296,8 @@ python manage.py runserver
 
 Open `http://127.0.0.1:8000/`.
 
-</details>
-
 <details>
-<summary><strong>macOS / Linux</strong></summary>
+<summary><strong>macOS / Linux commands</strong></summary>
 
 ```bash
 git clone https://github.com/webnix-technologygroup/autora-service.git
@@ -357,7 +327,7 @@ python manage.py runserver
 
 <br>
 
-## Validate
+# Quality checks
 
 ```bash
 python manage.py check
@@ -370,24 +340,37 @@ The suite covers booking, anonymous access, the multi-order cabinet, permissions
 
 <br>
 
-## Deploy
+# Production deployment
+
+```text
+Render Web Service
+    ├── Build: bash build.sh
+    ├── Start: Gunicorn
+    ├── Health: /readiness/
+    └── Auto-deploy: main branch
+
+Neon PostgreSQL
+    ├── Direct connection
+    ├── TLS required
+    └── Persistent production data
+```
 
 <details>
-<summary><strong>Render + Neon configuration</strong></summary>
+<summary><strong>Render commands and database variables</strong></summary>
 
-### Build
+### Build command
 
 ```bash
 bash build.sh
 ```
 
-### Start
+### Start command
 
 ```bash
 gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers ${GUNICORN_WORKERS:-1} --timeout 60 --access-logfile - --error-logfile -
 ```
 
-### Database
+### Database environment
 
 ```text
 POSTGRES_DB
@@ -398,23 +381,23 @@ POSTGRES_PORT=5432
 PGSSLMODE=require
 ```
 
-`build.sh` installs dependencies, collects static files, applies migrations, and runs the idempotent demo seed. Production secrets stay in Render environment variables.
-
 </details>
+
+Never commit `.env`, production credentials, SQLite databases, generated static files, or private uploads.
 
 <br>
 
-## Repository map
+# Repository structure
 
 ```text
-config/              Django configuration and production settings
-service/             Domain logic, customer access, staff UI, tests
-service/static/      CSS, JavaScript, logos, and SVG artwork
-templates/           Public, customer, staff, admin, and error UI
-docs/screenshots/    Portfolio gallery
+config/              Django settings, URLs, WSGI, and ASGI
+service/             Domain models, workflows, views, staff UI, and tests
+service/static/      Product styles, JavaScript, logos, and SVG artwork
+templates/           Public, customer, staff, admin, and error templates
+docs/screenshots/    Complete portfolio screenshot set
 .github/workflows/   Continuous integration
-build.sh             Render build and database preparation
-render.yaml          Optional infrastructure-as-code setup
+build.sh             Render build, migration, and demo-data setup
+render.yaml          Optional Render Blueprint configuration
 Dockerfile           Container deployment option
 ```
 
@@ -423,9 +406,9 @@ Dockerfile           Container deployment option
 ---
 
 <div align="center">
-  <img src="./service/static/service/logo-mark.svg" width="46" alt="AUTORA">
-  <br><br>
-  <strong>AUTORA</strong>
-  <br>
-  <sub>Designed and engineered as a complete Django portfolio case.</sub>
+  <img src="./service/static/service/logo-mark.svg" width="44" alt="AUTORA">
+
+  **AUTORA**
+
+  <sub>A complete Django portfolio case—from first contact to workshop delivery.</sub>
 </div>
