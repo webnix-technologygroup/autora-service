@@ -53,7 +53,7 @@ class RequestIdMiddleware:
                 "script-src 'self'; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; "
                 "base-uri 'self'; form-action 'self'"
             )
-            response["Referrer-Policy"] = "no-referrer"
+            response["Referrer-Policy"] = "strict-origin-when-cross-origin"
             response["X-Content-Type-Options"] = "nosniff"
             if request.path.startswith(
                 ("/staff/", "/access/", "/success/", "/portal/", "/private/", "/admin/")
