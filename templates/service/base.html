@@ -43,7 +43,7 @@
     <div><b>Сервис</b><a href="{% url 'services' %}">Услуги</a><a href="{% url 'process' %}">Процесс</a><a href="{% url 'cases' %}">Работы</a><a href="{% url 'client_portal' %}">Мой кабинет</a><a href="{% url 'warranty' %}">Гарантия</a></div>
     <div><b>Контакты</b><a href="tel:{{ site.phone }}">{{ site.phone }}</a><a href="mailto:{{ site.email }}">{{ site.email }}</a><p>{{ site.address }}</p><p>{{ site.working_hours }}</p></div>
   </div>
-  <div class="wrap legal">© {% now 'Y' %} AUTORA · <a href="{% url 'privacy' %}">Конфиденциальность</a> · <a href="{% url 'consent' %}">Обработка данных</a></div>
+<div class="wrap legal">© {% now 'Y' %} AUTORA · Разработано Webnix Technology Group · <a href="{% url 'privacy' %}">Конфиденциальность</a> · <a href="{% url 'consent' %}">Обработка данных</a></div>
 </footer>
 </body>
 </html>
