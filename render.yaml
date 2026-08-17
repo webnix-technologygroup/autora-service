@@ -6,10 +6,10 @@ databases:
 
 services:
   - type: web
-    name: autora-portfolio
+    name: autora-service
     runtime: python
     plan: free
-    buildCommand: ./build.sh
+    buildCommand: bash build.sh
     startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60 --access-logfile - --error-logfile -
     healthCheckPath: /readiness/
     envVars:
@@ -31,23 +31,15 @@ services:
         value: Europe/Kyiv
       - key: GUNICORN_WORKERS
         value: "2"
+      - key: PGSSLMODE
+        value: require
       - key: POSTGRES_DB
-        fromDatabase:
-          name: autora-db
-          property: database
+        sync: false
       - key: POSTGRES_USER
-        fromDatabase:
-          name: autora-db
-          property: user
+        sync: false
       - key: POSTGRES_PASSWORD
-        fromDatabase:
-          name: autora-db
-          property: password
+        sync: false
       - key: POSTGRES_HOST
-        fromDatabase:
-          name: autora-db
-          property: host
+        sync: false
       - key: POSTGRES_PORT
-        fromDatabase:
-          name: autora-db
-          property: port
+        value: "5432"
