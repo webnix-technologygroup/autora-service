@@ -1,1 +1,26 @@
-{% extends "service/base.html" %}{% block robots %}noindex,nofollow,noarchive{% endblock %}{% block content %}<section class="section"><div class="wrap narrow"><h1>Ссылка подтверждена</h1><a class="btn primary" href="{% url 'client_portal' %}">Открыть заказ</a></div></section>{% endblock %}
+{% extends "service/base.html" %}
+{% block robots %}noindex,nofollow,noarchive{% endblock %}
+{% block title %}Заявка {{ order.number }} принята · AUTORA{% endblock %}
+{% block content %}
+<section class="client-success-page">
+  <div class="wrap client-success-layout">
+    <div class="success-mark" aria-hidden="true"><span>✓</span></div>
+    <div class="client-success-copy">
+      <span class="kicker">Заявка {{ order.number }}</span>
+      <h1>Заявка принята<br><span class="accent-text">и уже в системе.</span></h1>
+      <p class="lead">Мы сохранили автомобиль, описание проблемы и выбранную услугу. Менеджер подтвердит время, а все изменения появятся в клиентском кабинете.</p>
+      <div class="success-summary">
+        <div><small>Автомобиль</small><b>{{ order.vehicle }}</b></div>
+        <div><small>Услуга</small><b>{{ order.service_name }}</b></div>
+        <div><small>Желаемая дата</small><b>{{ order.desired_date|date:'d.m.Y' }}{% if order.desired_time %} · {{ order.desired_time|time:'H:i' }}{% endif %}</b></div>
+        <div><small>Статус</small><b>{{ order.get_status_display }}</b></div>
+      </div>
+      <div class="actions">
+        <a class="btn accent" href="{% url 'client_portal' %}">Открыть кабинет</a>
+        <a class="btn" href="{% url 'home' %}">Вернуться на главную</a>
+      </div>
+      <p class="success-note">Сохраните номер <strong>{{ order.number }}</strong>. По нему можно добавить заявку в кабинет на любом устройстве — без регистрации.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -49,5 +49,5 @@ class Command(BaseCommand):
             service = services[slug]
             order, _ = Order.objects.update_or_create(number=f"DEMO-26-{index:03d}", defaults={"customer": customer, "vehicle": vehicle, "service": service, "service_name": service.name, "service_price_from": service.price_from, "problem": problem, "desired_date": timezone.localdate() + timedelta(days=index), "status": status, "estimate": Decimal(estimate), "is_demo": True})
             OrderEvent.objects.get_or_create(order=order, kind="created", defaults={"new_status": Order.Status.NEW, "public_message": "Заявка принята сервисом."})
-            EstimateItem.objects.get_or_create(order=order, name="Диагностика и работы", defaults={"item_type": "labor", "quantity": 1, "unit_price": Decimal(estimate), "order_index": 1})
+            EstimateItem.objects.get_or_create(order=order, name="Диагностика и работы", defaults={"item_type": "work", "quantity": 1, "unit_price": Decimal(estimate), "order_index": 1})
         self.stdout.write(self.style.SUCCESS("Демо-данные сайта готовы. Пользователи не создавались."))

@@ -1,0 +1,33 @@
+{% extends "service/base.html" %}
+{% block robots %}noindex,nofollow,noarchive{% endblock %}
+{% block title %}Клиентский кабинет · AUTORA{% endblock %}
+{% block content %}
+<section class="client-auth-page">
+  <div class="wrap client-auth-layout">
+    <div class="client-auth-copy">
+      <span class="kicker">Клиентский кабинет</span>
+      <h1>Ваш ремонт<br><span class="accent-text">без неизвестности.</span></h1>
+      <p class="lead">Введите только номер заявки. Мы добавим её в кабинет этого браузера — без регистрации, пароля и аккаунта.</p>
+      <div class="client-auth-benefits">
+        <div><span>01</span><p><b>Текущий статус</b><small>Понятный этап ремонта без звонков.</small></p></div>
+        <div><span>02</span><p><b>Смета и согласование</b><small>Стоимость фиксируется до начала работ.</small></p></div>
+        <div><span>03</span><p><b>История работ</b><small>Все публичные обновления в одном месте.</small></p></div>
+      </div>
+    </div>
+    <form class="client-auth-card" method="post" novalidate>
+      {% csrf_token %}
+      <div class="auth-card-head"><span>AUTORA CLIENT</span><h2>Добавить заявку</h2><p>Номер указан на экране после отправки формы.</p></div>
+      {% if form.non_field_errors %}<div class="form-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+      {% for field in form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<small id="error-{{ field.name }}">{{ field.errors|join:' ' }}</small>{% endif %}
+        </div>
+      {% endfor %}
+      <button class="btn accent client-auth-submit" type="submit">Добавить в мой кабинет</button>
+      <small class="auth-security">Номер заявки служит ключом доступа. Не передавайте его посторонним.</small>
+    </form>
+  </div>
+</section>
+{% endblock %}

@@ -1,47 +1,68 @@
 {% extends "service/base.html" %}
 {% block robots %}noindex,nofollow,noarchive{% endblock %}
-{% block title %}Статус заказа {{ order.number }}{% endblock %}
+{% block title %}Заказ {{ order.number }} · AUTORA{% endblock %}
 {% block content %}
-<section class="section soft">
-  <div class="wrap narrow">
-    <span class="eyebrow">Защищённая страница</span>
-    <h1>{{ order.get_status_display }}</h1>
-    <div class="summary">
-      <b>{{ order.number }}</b>
-      <span>{{ order.vehicle }}</span>
-      <span>{{ order.service_name }}</span>
-      <span>Желаемая дата: {{ order.desired_date }}{% if order.desired_time %}, {{ order.desired_time|time:'H:i' }}{% endif %}</span>
-      {% if order.confirmed_start_at %}<strong>Подтверждено: {{ order.confirmed_start_at|date:'d.m.Y H:i' }}{% if order.confirmed_end_at %}–{{ order.confirmed_end_at|date:'H:i' }}{% endif %}</strong>{% endif %}
-    </div>
-    <section class="panel" aria-labelledby="estimate-title">
-      <h2 id="estimate-title">Стоимость</h2>
-      <p>Цена от: <b>{{ order.service_price_from|floatformat:0 }} ₴</b></p>
-      {% if order.estimate is not None %}<p>Предварительная смета: <b>{{ order.estimate|floatformat:2 }} ₴</b></p>{% endif %}
-      {% if order.final_price %}<p>Итоговая стоимость: <b>{{ order.final_price|floatformat:2 }} ₴</b></p>{% endif %}
-      {% for item in items %}<div class="estimate-row"><span>{{ item.name }} × {{ item.quantity }}</span><b>{{ item.total|floatformat:2 }} ₴</b></div>{% endfor %}
-      {% if order.estimate is not None %}
-        <div class="estimate-state">
-          {% if order.estimate_approved and order.approved_estimate_amount == order.estimate %}
-            <strong>Смета согласована</strong>
-            {% if order.estimate_approval_method == 'client_portal' %}<p>Согласовано клиентом в защищённом кабинете.</p>
-            {% elif order.estimate_approval_method == 'phone' %}<p>Согласование зафиксировано сотрудником по телефону.</p>
-            {% elif order.estimate_approval_method == 'in_person' %}<p>Согласование зафиксировано при личном общении.</p>
-            {% elif order.estimate_approval_method == 'email' %}<p>Согласование зафиксировано по email.</p>
-            {% endif %}
-          {% elif order.status == 'awaiting_approval' %}
-            <strong>Ожидает согласования</strong>
-            <form method="post" action="{% url 'client_estimate_approve' %}">
-              {% csrf_token %}<input type="hidden" name="version" value="{{ order.estimate_version }}">
-              <button class="btn primary" type="submit">Согласовать {{ order.estimate|floatformat:2 }} ₴</button>
-            </form>
-          {% elif order.status == 'new' or order.status == 'pending' or order.status == 'booked' or order.status == 'accepted' or order.status == 'diagnostics' %}
-            <p>Смета подготовлена. Возможность согласования появится на соответствующем этапе.</p>
-          {% else %}<p>Этап согласования завершён.</p>{% endif %}
-        </div>
-      {% endif %}
+<section class="client-portal">
+  <div class="wrap">
+    <a class="client-back-link" href="{% url 'client_portal' %}">← Все мои заказы</a>
+    <header class="client-portal-head">
+      <div>
+        <span class="kicker">Клиентский кабинет</span>
+        <div class="client-title-row"><h1>{{ order.vehicle }}</h1><span class="client-status status-{{ order.status }}"><i></i>{{ order.get_status_display }}</span></div>
+        <p>{{ order.number }} · {{ order.service_name }} · обновлено {{ order.updated_at|date:'d.m.Y H:i' }}</p>
+      </div>
+      <a class="btn" href="{% url 'client_login' %}">+ Добавить заявку</a>
+    </header>
+
+    {% if order.status == 'canceled' or order.status == 'no_show' %}<div class="client-alert">Заказ закрыт со статусом «{{ order.get_status_display }}». Если это ошибка, свяжитесь с сервисом.</div>{% endif %}
+
+    <section class="client-progress-card" aria-labelledby="progress-title">
+      <div class="client-section-head"><div><span>ПРОГРЕСС</span><h2 id="progress-title">Путь автомобиля</h2></div><b>{{ order.get_status_display }}</b></div>
+      <div class="client-progress">
+        {% for stage in stages %}<div class="client-progress-step {{ stage.state }}"><span>{{ stage.number }}</span><i></i><b>{{ stage.label }}</b></div>{% endfor %}
+      </div>
     </section>
-    {% if order.photos.exists %}<section class="panel"><h2>Фотографии заявки</h2><div class="photo-grid">{% for photo in order.photos.all %}<img src="{% url 'private_photo' photo.pk %}" alt="Фотография к заявке {{ forloop.counter }}">{% endfor %}</div></section>{% endif %}
-    <section class="panel"><h2>Публичная история</h2><div class="timeline">{% for event in events %}<div><i></i><b>{{ event.public_message }}</b><small>{{ event.created_at|date:'d.m.Y H:i' }}</small></div>{% empty %}<p>История пока пуста.</p>{% endfor %}</div></section>
+
+    <div class="client-dashboard-grid">
+      <div class="client-main-column">
+        <section class="client-card">
+          <div class="client-section-head"><div><span>ЗАКАЗ</span><h2>Ключевая информация</h2></div></div>
+          <dl class="client-summary-grid">
+            <div><dt>Автомобиль</dt><dd>{{ order.vehicle }}<small>{{ order.vehicle.year|default:'Год не указан' }} · {{ order.vehicle.plate|default:'Номер не указан' }}</small></dd></div>
+            <div><dt>Услуга</dt><dd>{{ order.service_name }}<small>Цена от {{ order.service_price_from|floatformat:0 }} ₴</small></dd></div>
+            <div><dt>Желаемое время</dt><dd>{{ order.desired_date|date:'d.m.Y' }}{% if order.desired_time %} · {{ order.desired_time|time:'H:i' }}{% endif %}<small>Будет подтверждено менеджером</small></dd></div>
+            <div><dt>Подтверждено</dt><dd>{% if order.confirmed_start_at %}{{ order.confirmed_start_at|date:'d.m.Y · H:i' }}{% else %}Ожидает подтверждения{% endif %}{% if order.confirmed_end_at %}<small>Окончание около {{ order.confirmed_end_at|date:'H:i' }}</small>{% endif %}</dd></div>
+          </dl>
+          <div class="client-problem"><small>ЗАДАЧА</small><p>{{ order.problem }}</p></div>
+        </section>
+
+        <section class="client-card" id="estimate">
+          <div class="client-section-head"><div><span>СМЕТА</span><h2>Работы и материалы</h2></div><strong>{% if order.final_price %}{{ order.final_price|floatformat:2 }}{% elif order.estimate is not None %}{{ order.estimate|floatformat:2 }}{% else %}—{% endif %} ₴</strong></div>
+          <div class="client-estimate-list">
+            {% for item in items %}<div><span><b>{{ item.name }}</b><small>{{ item.get_item_type_display }} · {{ item.quantity }} × {{ item.unit_price|floatformat:2 }} ₴</small></span><strong>{{ item.total|floatformat:2 }} ₴</strong></div>
+            {% empty %}<div class="client-empty"><b>Смета ещё не подготовлена</b><p>Она появится после диагностики и до начала дополнительных работ.</p></div>{% endfor %}
+          </div>
+          {% if order.estimate is not None %}
+            <div class="client-estimate-action">
+              {% if order.estimate_approved and order.approved_estimate_amount == order.estimate %}
+                <span class="approval-mark">✓</span><div><b>Согласовано клиентом</b><p>Зафиксированная сумма: {{ order.approved_estimate_amount|floatformat:2 }} ₴.</p></div>
+              {% elif order.status == 'awaiting_approval' %}
+                <div><b>Нужно ваше решение</b><p>Проверьте позиции перед началом работ.</p></div>
+                <form method="post" action="{% url 'client_estimate_approve' order.public_id %}">{% csrf_token %}<input type="hidden" name="version" value="{{ order.estimate_version }}"><button class="btn accent" type="submit">Согласовать {{ order.estimate|floatformat:2 }} ₴</button></form>
+              {% else %}<div><b>Предварительная смета</b><p>Согласование станет доступно на соответствующем этапе.</p></div>{% endif %}
+            </div>
+          {% endif %}
+        </section>
+
+        {% if order.photos.exists %}<section class="client-card"><div class="client-section-head"><div><span>МАТЕРИАЛЫ</span><h2>Фотографии</h2></div><b>{{ order.photos.count }}</b></div><div class="client-photo-grid">{% for photo in order.photos.all %}<a href="{% url 'private_photo' photo.pk %}" target="_blank" rel="noopener"><img src="{% url 'private_photo' photo.pk %}" alt="Фото заявки {{ forloop.counter }}" loading="lazy"><span>{{ photo.original_name }}</span></a>{% endfor %}</div></section>{% endif %}
+      </div>
+
+      <aside class="client-side-column">
+        <section class="client-card client-contact-card"><span>НУЖНА ПОМОЩЬ?</span><h2>Мы на связи</h2><p>Назовите менеджеру номер заказа {{ order.number }}.</p><a href="tel:{{ site.phone }}">{{ site.phone }}</a><a href="mailto:{{ site.email }}">{{ site.email }}</a></section>
+        <section class="client-card client-notifications" id="notifications"><div class="client-section-head"><div><span>УВЕДОМЛЕНИЯ</span><h2>Что нового</h2></div><b class="client-notification-count{% if unread_count %} has-unread{% endif %}">{% if unread_count %}{{ unread_count }} нов.{% else %}Прочитано{% endif %}</b></div><div class="client-timeline">{% for event in events %}<article{% if event.is_unread %} class="is-unread"{% endif %}><i></i><div><div class="client-notification-title"><b>{{ event.public_message }}</b>{% if event.is_unread %}<em>Новое</em>{% endif %}</div><time>{{ event.created_at|date:'d.m.Y · H:i' }}</time></div></article>{% empty %}<div class="client-empty"><p>Первое уведомление скоро появится.</p></div>{% endfor %}</div></section>
+        <section class="client-card client-security-card"><span>ЗАЩИЩЁННЫЙ ДОСТУП</span><p>Страница не индексируется. Не передавайте ссылку и данные заявки посторонним.</p></section>
+      </aside>
+    </div>
   </div>
 </section>
 {% endblock %}

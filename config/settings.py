@@ -146,6 +146,9 @@ TEMPLATES = [
 ]
 
 if IS_PRODUCTION or os.getenv("POSTGRES_DB"):
+    postgres_sslmode = os.getenv("PGSSLMODE", "require" if IS_PRODUCTION else "prefer").strip()
+    if IS_PRODUCTION and postgres_sslmode != "require":
+        raise ImproperlyConfigured("PGSSLMODE must be require in production")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -155,7 +158,7 @@ if IS_PRODUCTION or os.getenv("POSTGRES_DB"):
             "HOST": required("POSTGRES_HOST"),
             "PORT": os.getenv("POSTGRES_PORT", "5432"),
             "CONN_MAX_AGE": 60 if IS_PRODUCTION else 0,
-            "OPTIONS": {"connect_timeout": 5},
+            "OPTIONS": {"connect_timeout": 5, "sslmode": postgres_sslmode},
         }
     }
 else:

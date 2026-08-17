@@ -264,8 +264,8 @@ class SettingsSubprocessTests(MotorCase):
     def test_short_secret(self):
         self.assertNotEqual(self.run_settings(DJANGO_SECRET_KEY="short").returncode, 0)
 
-    def test_missing_redis(self):
-        self.assertNotEqual(self.run_settings(REDIS_URL=None).returncode, 0)
+    def test_missing_redis_uses_local_memory_cache(self):
+        self.assertEqual(self.run_settings(REDIS_URL=None).returncode, 0)
 
     def test_http_production_url(self):
         self.assertNotEqual(self.run_settings(PUBLIC_BASE_URL="http://motor.test").returncode, 0)

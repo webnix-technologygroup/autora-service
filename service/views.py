@@ -10,14 +10,15 @@ from django.core.exceptions import ValidationError
 from django.db import connection
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .auth import is_employee
-from .client_access import current_link, establish
+from .client_access import cabinet_links, clear_cabinet, current_link, establish, forget_order, link_for_order
 from .estimates import approve_current
-from .forms import BookingForm
-from .links import resolve_access
-from .models import OrderPhoto, Service
+from .forms import BookingForm, ClientLoginForm
+from .links import issue_link, resolve_access
+from .models import Order, OrderPhoto, Service
 from .orders import create_order
 from .policies import can_access_order
 from .security import client_ip
@@ -118,24 +119,151 @@ def exchange_access(request, public_id, token):
 
 
 def success(request, public_id, token):
-    return exchange_access(request, public_id, token)
+    link = resolve_access(public_id, token)
+    if not link:
+        raise Http404
+    establish(request, link)
+    return render(request, "service/success.html", {"order": link.order})
+
+
+def client_login(request):
+    form = ClientLoginForm(request.POST or None)
+    if request.method == "POST":
+        key = "client-login:" + _rate_key(request)
+        if cache.get(key, 0) >= 8:
+            form.add_error(None, "Слишком много попыток. Подождите час и попробуйте снова.")
+        elif form.is_valid():
+            order = (
+                Order.objects.select_related("customer", "vehicle", "service")
+                .filter(number__iexact=form.cleaned_data["order_number"])
+                .first()
+            )
+            if order:
+                link = (
+                    order.access_links.filter(
+                        revoked_at__isnull=True,
+                        expires_at__gt=timezone.now(),
+                    )
+                    .order_by("-created_at")
+                    .first()
+                )
+                if not link:
+                    token = issue_link(order)
+                    link = resolve_access(order.public_id, token)
+                establish(request, link)
+                cache.delete(key)
+                messages.success(request, f"Заявка {order.number} добавлена в ваш кабинет.")
+                return redirect("client_portal")
+            _increment_rate(key, 2)
+            form.add_error(None, "Заявка с таким номером не найдена.")
+    return render(request, "service/client_login.html", {"form": form})
+
+
+@require_POST
+def client_logout(request):
+    clear_cabinet(request)
+    request.session.cycle_key()
+    messages.success(request, "Данные кабинета удалены из этого браузера.")
+    return redirect("client_login")
+
+
+def _events_with_unread(request, order, mark_seen=False):
+    events = list(order.events.exclude(public_message="").select_related("actor"))
+    notifications_key = f"autora_client_notifications:{order.pk}"
+    seen_ids = {
+        int(value)
+        for value in (request.session.get(notifications_key) or [])
+        if str(value).isdigit()
+    }
+    unread_count = 0
+    for event in events:
+        event.is_unread = event.pk not in seen_ids
+        unread_count += int(event.is_unread)
+    if mark_seen:
+        current_ids = [event.pk for event in events[-100:]]
+        if current_ids != request.session.get(notifications_key):
+            request.session[notifications_key] = current_ids
+    return events, unread_count
 
 
 def client_portal(request):
-    order = current_link(request).order
+    links = cabinet_links(request)
+    if not links:
+        messages.info(request, "Добавьте заявку по её номеру — регистрация не нужна.")
+        return redirect("client_login")
+    orders = []
+    total_unread = 0
+    for link in links:
+        _, unread_count = _events_with_unread(request, link.order)
+        total_unread += unread_count
+        orders.append({"order": link.order, "unread_count": unread_count})
+    return render(
+        request,
+        "service/client_dashboard.html",
+        {"orders": orders, "unread_count": total_unread},
+    )
+
+
+def client_order(request, public_id):
+    order = link_for_order(request, public_id).order
+    stage_index = {
+        Order.Status.NEW: 0,
+        Order.Status.PENDING: 0,
+        Order.Status.BOOKED: 1,
+        Order.Status.ACCEPTED: 1,
+        Order.Status.DIAGNOSTICS: 2,
+        Order.Status.AWAITING_APPROVAL: 2,
+        Order.Status.PARTS: 3,
+        Order.Status.REPAIR: 3,
+        Order.Status.READY: 4,
+        Order.Status.DONE: 4,
+        Order.Status.CANCELED: 0,
+        Order.Status.NO_SHOW: 0,
+    }.get(order.status, 0)
+    labels = ["Заявка", "Приёмка", "Диагностика", "Работы", "Готово"]
+    stages = [
+        {
+            "number": f"0{index + 1}",
+            "label": label,
+            "state": "done" if index < stage_index else "current" if index == stage_index else "next",
+        }
+        for index, label in enumerate(labels)
+    ]
+    events, unread_count = _events_with_unread(request, order, mark_seen=True)
     return render(
         request,
         "service/track.html",
         {
             "order": order,
-            "events": order.events.exclude(public_message="").select_related("actor"),
+            "stages": stages,
+            "events": events,
+            "unread_count": unread_count,
             "items": order.estimate_items.all(),
         },
     )
 
 
 @require_POST
-def client_estimate_approve(request):
+def client_forget_order(request, public_id):
+    forget_order(request, public_id)
+    messages.success(request, "Заявка удалена из этого браузера.")
+    return redirect("client_portal")
+
+
+@require_POST
+def client_estimate_approve(request, public_id):
+    order = link_for_order(request, public_id).order
+    try:
+        approve_current(order.pk, request.POST.get("version", ""), "client_portal")
+    except (ValidationError, ValueError, TypeError) as exc:
+        messages.error(request, str(exc))
+    else:
+        messages.success(request, "Смета согласована.")
+    return redirect("client_order", public_id=order.public_id)
+
+
+@require_POST
+def client_estimate_approve_legacy(request):
     order = current_link(request).order
     try:
         approve_current(order.pk, request.POST.get("version", ""), "client_portal")
@@ -143,7 +271,7 @@ def client_estimate_approve(request):
         messages.error(request, str(exc))
     else:
         messages.success(request, "Смета согласована.")
-    return redirect("client_portal")
+    return redirect("client_order", public_id=order.public_id)
 
 
 def private_photo(request, pk):
@@ -151,7 +279,7 @@ def private_photo(request, pk):
     allowed = is_employee(request.user) and can_access_order(request.user, photo.order)
     if not allowed:
         try:
-            allowed = current_link(request).order_id == photo.order_id
+            allowed = link_for_order(request, photo.order.public_id).order_id == photo.order_id
         except Http404:
             allowed = False
     if not allowed:

@@ -68,7 +68,7 @@
 <b>{{ item.name }}</b>
 <small>{{ item.get_item_type_display }} · {{ item.quantity }} × {{ item.unit_price }} ₴</small>
 </span>
-<strong>{{ item.total }} ₴</strong>{% if can_manage_finance and not order.is_terminal %}<form method="post" action="{% url 'delete_estimate_item' order.pk item.pk %}" data-confirm="Удалить позицию сметы?">{% csrf_token %}<button class="icon-danger" aria-label="Удалить">×</button>
+<strong>{{ item.total|floatformat:2 }} ₴</strong>{% if can_manage_finance and not order.is_terminal %}<form method="post" action="{% url 'delete_estimate_item' order.pk item.pk %}" data-confirm="Удалить позицию сметы?">{% csrf_token %}<button class="icon-danger" aria-label="Удалить">×</button>
 </form>{% endif %}</div>{% empty %}<div class="staff-empty">Позиции сметы ещё не добавлены.</div>{% endfor %}</div>{% if can_manage_finance and not order.is_terminal %}<details class="action-box">
 <summary>Добавить позицию</summary>
 <form method="post" action="{% url 'add_estimate_item' order.pk %}" class="manual-form">{% csrf_token %}{% for field in item_form %}<label>
@@ -102,7 +102,7 @@
 </div>
 <aside class="order-actions">{% if not order.is_terminal %}<section class="staff-panel">
 <h2>Статус</h2>
-<form method="post" action="{% url 'change_status' order.pk %}" class="manual-form">{% csrf_token %}{% for field in status_form %}<label>
+<form method="post" action="{% url 'change_status' order.pk %}" class="manual-form">{% csrf_token %}{% for field in status_form.hidden_fields %}{{ field }}{% endfor %}{% for field in status_form.visible_fields %}<label>
 <span>{{ field.label }}</span>{{ field }}{% for error in field.errors %}<small class="error">{{ error }}</small>{% endfor %}</label>{% endfor %}<button class="sbtn accent">Изменить статус</button>
 </form>
 </section>{% endif %}{% if can_schedule and not order.is_terminal %}<section class="staff-panel">

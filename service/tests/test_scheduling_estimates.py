@@ -211,5 +211,5 @@ class EstimateTests(MotorCase):
         token = __import__("service.links", fromlist=["issue_link"]).issue_link(self.order)
         self.client.get(reverse("client_exchange", args=[self.order.public_id, token]))
         approve_current(self.order.pk, self.order.estimate_version, "client_portal")
-        response = self.client.get(reverse("client_portal"))
+        response = self.client.get(reverse("client_order", args=[self.order.public_id]))
         self.assertContains(response, "Согласовано клиентом")

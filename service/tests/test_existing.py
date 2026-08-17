@@ -74,7 +74,7 @@ class ClientAccessTests(BaseCase):
         token = issue_link(self.order)
         self.client.get(reverse("client_exchange", args=[self.order.public_id, token]))
         self.order.access_links.update(revoked_at=timezone.now())
-        self.assertEqual(self.client.get(reverse("client_portal")).status_code, 404)
+        self.assertRedirects(self.client.get(reverse("client_portal")), reverse("client_login"))
 
     def test_reissue_invalidates_old_exchange_url(self):
         old_token = issue_link(self.order)

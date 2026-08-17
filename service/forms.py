@@ -86,6 +86,23 @@ class BookingForm(AccessibleFormMixin, forms.Form):
         return data
 
 
+class ClientLoginForm(AccessibleFormMixin, forms.Form):
+    order_number = forms.CharField(
+        max_length=20,
+        label="Номер заявки",
+        widget=forms.TextInput(
+            attrs={
+                "autocomplete": "off",
+                "placeholder": "Например, M26-A1B2C3D4E5",
+                "spellcheck": "false",
+            }
+        ),
+    )
+
+    def clean_order_number(self):
+        return self.cleaned_data["order_number"].strip().upper()
+
+
 class StatusForm(forms.Form):
     status = forms.ChoiceField(label="Следующий статус")
     expected_status = forms.CharField(widget=forms.HiddenInput)
@@ -112,6 +129,7 @@ class AssignmentForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = ["assigned_to"]
+        labels = {"assigned_to": "Ответственный"}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -131,6 +149,10 @@ class ScheduleForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = ["confirmed_start_at", "confirmed_end_at"]
+        labels = {
+            "confirmed_start_at": "Начало работ",
+            "confirmed_end_at": "Окончание работ",
+        }
         widgets = {
             "confirmed_start_at": forms.DateTimeInput(
                 attrs={"type": "datetime-local"}, format="%Y-%m-%dT%H:%M"
@@ -158,6 +180,11 @@ class PriceForm(forms.ModelForm):
     class Meta:
         model = Order
         fields = ["estimate", "estimate_note", "final_price"]
+        labels = {
+            "estimate": "Предварительная стоимость",
+            "estimate_note": "Комментарий к смете",
+            "final_price": "Итоговая стоимость",
+        }
 
 
 class ManualApprovalForm(forms.Form):
@@ -172,6 +199,13 @@ class EstimateItemForm(forms.ModelForm):
     class Meta:
         model = EstimateItem
         fields = ["item_type", "name", "quantity", "unit_price", "order_index"]
+        labels = {
+            "item_type": "Тип позиции",
+            "name": "Название",
+            "quantity": "Количество",
+            "unit_price": "Цена за единицу",
+            "order_index": "Порядок",
+        }
 
 
 class CommentForm(forms.Form):

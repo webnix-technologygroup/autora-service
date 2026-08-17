@@ -1,0 +1,29 @@
+{% extends "service/base.html" %}
+{% block robots %}noindex,nofollow,noarchive{% endblock %}
+{% block title %}Мой кабинет · AUTORA{% endblock %}
+{% block content %}
+<section class="client-cabinet-page">
+  <div class="wrap">
+    <header class="client-cabinet-head">
+      <div><span class="kicker">Без регистрации</span><h1>Мой кабинет</h1><p>Заказы, открытые в этом браузере. Для добавления новой заявки достаточно её номера.</p></div>
+      <form method="post" action="{% url 'client_logout' %}">{% csrf_token %}<button class="btn" type="submit">Очистить кабинет</button></form>
+    </header>
+    <div class="client-cabinet-toolbar">
+      <div><b>{{ orders|length }}</b><span>заказов сохранено</span></div>
+      <a class="btn accent" href="{% url 'client_login' %}">+ Добавить заявку</a>
+    </div>
+    <div class="client-order-grid">
+      {% for item in orders %}
+        <article class="client-order-card">
+          <div class="client-order-card-top"><span>{{ item.order.number }}</span><span class="client-status status-{{ item.order.status }}"><i></i>{{ item.order.get_status_display }}</span></div>
+          <h2>{{ item.order.vehicle }}</h2><p>{{ item.order.service_name }}</p>
+          <dl><div><dt>Желаемая дата</dt><dd>{{ item.order.desired_date|date:'d.m.Y' }}</dd></div><div><dt>Обновлено</dt><dd>{{ item.order.updated_at|date:'d.m.Y H:i' }}</dd></div></dl>
+          {% if item.unread_count %}<div class="client-order-unread"><i></i>{{ item.unread_count }} новых уведомлений</div>{% endif %}
+          <div class="client-order-actions"><a class="btn accent" href="{% url 'client_order' item.order.public_id %}">Открыть заказ</a><form method="post" action="{% url 'client_forget_order' item.order.public_id %}" data-confirm="Убрать заказ из этого браузера?">{% csrf_token %}<button class="btn" type="submit">Убрать</button></form></div>
+        </article>
+      {% endfor %}
+    </div>
+    <div class="client-cabinet-note"><b>Как это работает</b><p>Аккаунт и пароль не нужны. Кабинет хранится в защищённой сессии этого браузера. На другом устройстве добавьте заявку повторно по её номеру.</p></div>
+  </div>
+</section>
+{% endblock %}

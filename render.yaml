@@ -1,16 +1,10 @@
-databases:
-  - name: autora-db
-    plan: free
-    databaseName: autora
-    user: autora
-
 services:
   - type: web
-    name: autora-service
+    name: autora-portfolio
     runtime: python
     plan: free
     buildCommand: bash build.sh
-    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 60 --access-logfile - --error-logfile -
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers ${GUNICORN_WORKERS:-1} --timeout 60 --access-logfile - --error-logfile -
     healthCheckPath: /readiness/
     envVars:
       - key: DJANGO_ENV
@@ -27,12 +21,12 @@ services:
         value: "1"
       - key: TRUST_PROXY_HEADERS
         value: "1"
+      - key: PGSSLMODE
+        value: require
       - key: TIME_ZONE
         value: Europe/Kyiv
       - key: GUNICORN_WORKERS
-        value: "2"
-      - key: PGSSLMODE
-        value: require
+        value: "1"
       - key: POSTGRES_DB
         sync: false
       - key: POSTGRES_USER

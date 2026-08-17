@@ -1,1 +1,44 @@
-{% load static %}<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow,noarchive"><title>{% block title %}Кабинет{% endblock %} · AUTORA</title><link rel="icon" href="{% static 'service/favicon.svg' %}"><link rel="stylesheet" href="{% static 'service/staff.css' %}"><script defer src="{% static 'service/staff.js' %}"></script></head><body class="staff-body"><a class="skip" href="#staff-main">К содержимому</a><div class="staff-shell"><aside class="staff-sidebar" id="staff-menu"><a class="staff-brand" href="{% url 'dashboard' %}"><span>М</span><b>AUTORA</b></a><nav aria-label="Кабинет"><a href="{% url 'dashboard' %}">Обзор</a><a href="{% url 'staff_orders' %}">Все заявки</a><a href="{% url 'staff_orders' %}?view=mine">Мои заказы</a><a href="{% url 'staff_orders' %}?view=new">Новые</a><a href="{% url 'staff_orders' %}?view=today">Сегодня</a><a href="{% url 'staff_orders' %}?view=approval">Ожидают согласования</a><a href="{% url 'staff_orders' %}?view=ready">Готовы к выдаче</a>{% if perms.service.retry_notifications %}<a href="{% url 'staff_orders' %}?view=failed">Проблемные уведомления</a>{% endif %}</nav><div class="staff-sidebar-foot"><a href="{% url 'home' %}" target="_blank" rel="noopener">Открыть сайт ↗</a>{% if user.is_superuser %}<a href="{% url 'admin:index' %}">Системная админка</a>{% endif %}</div></aside><div class="staff-backdrop" data-staff-backdrop aria-hidden="true"></div><div class="staff-work"><header class="staff-top"><button class="staff-menu-button" type="button" aria-controls="staff-menu" aria-expanded="false">Меню</button><div><b>{{ user.get_full_name|default:user.username }}</b><small>{{ role_name }}</small></div><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="text-button" type="submit">Выйти</button></form></header>{% if messages %}<div class="staff-messages" aria-live="polite">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}<main id="staff-main" class="staff-main">{% block content %}{% endblock %}</main></div></div></body></html>
+{% load static %}
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#ffffff">
+  <title>{% block title %}Кабинет{% endblock %} · AUTORA</title>
+  <link rel="icon" href="{% static 'service/favicon.svg' %}">
+  <link rel="stylesheet" href="{% static 'service/staff.css' %}?v=autora-2">
+  <script defer src="{% static 'service/staff.js' %}?v=2"></script>
+</head>
+<body class="staff-body">
+<a class="skip" href="#staff-main">К содержимому</a>
+<div class="staff-shell">
+  <aside class="staff-sidebar" id="staff-menu">
+    <a class="staff-brand" href="{% url 'dashboard' %}"><img src="{% static 'service/logo-mark.svg' %}" alt=""><span>AUTORA<small>Service workspace</small></span></a>
+    <p class="staff-nav-label">Рабочее пространство</p>
+    <nav aria-label="Кабинет">
+      <a class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}"><i>01</i><span>Обзор</span></a>
+      <a class="{% if request.resolver_match.url_name == 'staff_orders' and not request.GET.view %}active{% endif %}" href="{% url 'staff_orders' %}"><i>02</i><span>Все заявки</span></a>
+      <a href="{% url 'staff_orders' %}?view=mine"><i>03</i><span>Мои заказы</span></a>
+      <a href="{% url 'staff_orders' %}?view=new"><i>04</i><span>Новые</span></a>
+      <a href="{% url 'staff_orders' %}?view=today"><i>05</i><span>Сегодня</span></a>
+      <a href="{% url 'staff_orders' %}?view=approval"><i>06</i><span>Согласование</span></a>
+      <a href="{% url 'staff_orders' %}?view=ready"><i>07</i><span>К выдаче</span></a>
+    </nav>
+    <div class="staff-sidebar-foot"><a href="{% url 'home' %}" target="_blank" rel="noopener">Открыть сайт <span>↗</span></a>{% if user.is_superuser %}<a href="{% url 'admin:index' %}">Администрирование <span>↗</span></a>{% endif %}</div>
+  </aside>
+  <div class="staff-backdrop" data-staff-backdrop aria-hidden="true"></div>
+  <div class="staff-work">
+    <header class="staff-top">
+      <button class="staff-menu-button" type="button" aria-controls="staff-menu" aria-expanded="false" aria-label="Открыть меню"><span></span><span></span><span></span></button>
+      <div class="staff-top-context"><small>Операционный кабинет</small><b>{% now 'd.m.Y' %}</b></div>
+      <div class="staff-user"><span class="staff-avatar">{{ user.username|slice:':1'|upper }}</span><div><b>{{ user.get_full_name|default:user.username }}</b><small>{{ role_name }}</small></div></div>
+      <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="text-button" type="submit">Выйти</button></form>
+    </header>
+    {% if messages %}<div class="staff-messages" aria-live="polite">{% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+    <main id="staff-main" class="staff-main">{% block content %}{% endblock %}</main>
+  </div>
+</div>
+</body>
+</html>

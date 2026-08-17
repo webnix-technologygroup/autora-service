@@ -174,7 +174,7 @@ class Order(models.Model):
 
     @staticmethod
     def new_number():
-        return f"M{timezone.now():%y}-{secrets.token_hex(3).upper()}"
+        return f"M{timezone.now():%y}-{secrets.token_hex(5).upper()}"
 
     def clean(self):
         super().clean()
